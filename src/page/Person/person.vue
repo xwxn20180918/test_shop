@@ -11,13 +11,13 @@
           <i class="iconfont icon-dengluyonghu"></i>
         </div>
       </a>
-      <a href="javascript:;" class="person_right">
+      <router-link to="/login" href="javascript:;" class="person_right">
         <span class="person_first_span">登录/注册</span>
         <span>
           <i class="iconfont icon-shouji"></i>
           <span>暂无绑定手机号</span>
         </span>
-      </a>
+      </router-link>
     </section>
     <section>
       <ul class="person_ul">
