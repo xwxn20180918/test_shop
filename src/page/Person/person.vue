@@ -2,20 +2,22 @@
   <div>
     <section>
       <header class="person_header">
-        <a href="javascript:;"><span>我的</span></a>
+        <a href="javascript:;">
+          <span>我的</span>
+        </a>
       </header>
     </section>
     <section class="person_content">
-      <a href="javascript:;" >
+      <a href="javascript:;">
         <div class="person_left">
           <i class="iconfont icon-dengluyonghu"></i>
         </div>
       </a>
       <router-link to="/login" href="javascript:;" class="person_right">
-        <span class="person_first_span">登录/注册</span>
+        <span class="person_first_span" v-if="!userInfo.phone">{{userInfo.name ? userInfo.name :'登录/注册'}}</span>
         <span>
           <i class="iconfont icon-shouji"></i>
-          <span>暂无绑定手机号</span>
+          <span>{{userInfo.phone ? userInfo.phone :'暂无绑定手机号' }}</span>
         </span>
       </router-link>
     </section>
@@ -39,106 +41,161 @@
       <ul class="person_order border-1px">
         <li>
           <a href="javascript:;">
-            <span><i class="iconfont icon-wodedingdan"></i>我的订单</span>
+            <span>
+              <i class="iconfont icon-wodedingdan"></i>我的订单
+            </span>
           </a>
         </li>
         <li>
           <a href="javascript:;">
-            <span><i class="iconfont icon-jifenshangcheng"></i>积分商城</span>
+            <span>
+              <i class="iconfont icon-jifenshangcheng"></i>积分商城
+            </span>
           </a>
         </li>
         <li>
           <a href="javascript:;">
-            <span><i class="iconfont icon-fuwuzhongxin"></i>服务中心</span>
+            <span>
+              <i class="iconfont icon-fuwuzhongxin"></i>服务中心
+            </span>
           </a>
         </li>
         <li>
           <a href="javascript:;">
-            <span><i class="iconfont icon-huiyuanqia"></i>十里飘香会员卡</span>
+            <span>
+              <i class="iconfont icon-huiyuanqia"></i>十里飘香会员卡
+            </span>
           </a>
         </li>
       </ul>
+    </section>
+    <section v-show="userInfo._id">
+      <mt-button type="danger" style="width:100%;" @click="logOut">退出</mt-button>
     </section>
   </div>
 </template>
 
 <script>
+import { MessageBox, Toast } from "mint-ui";
+import { mapState } from "vuex";
 export default {
   data() {
     return {};
+  },
+  computed: {
+    ...mapState(["userInfo"])
+  },
+  methods: {
+    logOut() {
+      MessageBox.confirm("确定退出吗?").then(
+        () => {
+          this.$store.dispatch("getLogOut");
+          Toast("退出成功");
+        },
+        () => {}
+      );
+    }
   },
   components: {}
 };
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
-@import '../../common/stylus/mixins.styl'
-.person_header
-  width 100%
-  background-color deeppink
-  height 50px
-  display flex
-  justify-content center
-  align-items center
-  color #ffffff
-  font-size 20px
-  border-top 1px solid #FFFFFF
-  >a
-    color #fff
-.person_content
-  display flex
-  width 100%
-  height 100px
-  background-color deeppink
-  top-border-1px(#fff)
-  align-items center
-  .person_left
-    width 50px
-    height 50px
-    border 1px solid #E4E4E4
-    background-color #E4E4E4
-    border-radius 50%
-    text-align center
-    margin-left 15px
-    display flex
-    .iconfont
-      font-size 40px
-      margin-left 5px
-  .person_right
-    display flex
-    flex-direction column
-    margin-left 10px
-    color #fff
-    .person_first_span  
-      font-size 18px
-      margin 10px 0 10px 30px
-.person_ul
-  width 100%
-  height 85px
-  display flex
-  flex-direction row
-  justify-content space-around
-  align-items center 
-  >li
-    display flex
-    flex-direction column
-    align-items center 
-    >span
-      margin 5px 0 10px 0
-  .person_number
-    color red
-    font-size 18px
-    font-weight 700
-.person_order
-  top-border-1px(#fff)
-  display flex
-  flex-direction column
+@import '../../common/stylus/mixins.styl';
+
+.person_header {
+  width: 100%;
+  background-color: deeppink;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 20px;
+  border-top: 1px solid #FFFFFF;
+
+  >a {
+    color: #fff;
+  }
+}
+
+.person_content {
+  display: flex;
+  width: 100%;
+  height: 100px;
+  background-color: deeppink;
+  top-border-1px(#fff);
+  align-items: center;
+
+  .person_left {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #E4E4E4;
+    background-color: #E4E4E4;
+    border-radius: 50%;
+    text-align: center;
+    margin-left: 15px;
+    display: flex;
+
+    .iconfont {
+      font-size: 40px;
+      margin-left: 5px;
+    }
+  }
+
+  .person_right {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    color: #fff;
+
+    .person_first_span {
+      font-size: 18px;
+      margin: 10px 0 10px 30px;
+    }
+  }
+}
+
+.person_ul {
+  width: 100%;
+  height: 85px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+
+  >li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    >span {
+      margin: 5px 0 10px 0;
+    }
+  }
+
+  .person_number {
+    color: red;
+    font-size: 18px;
+    font-weight: 700;
+  }
+}
+
+.person_order {
+  top-border-1px(#fff);
+  display: flex;
+  flex-direction: column;
   // align-items center
-  justify-content start
-  >li
-    padding 20px 
-    .iconfont
-      margin-right 10px
-      color red
-      font-size 18px
+  justify-content: start;
+
+  >li {
+    padding: 20px;
+
+    .iconfont {
+      margin-right: 10px;
+      color: red;
+      font-size: 18px;
+    }
+  }
+}
 </style>

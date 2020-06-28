@@ -10,6 +10,9 @@
 import Footer from './components/Footer'
 export default {
   name: 'App',
+  mounted(){
+    this.$store.dispatch('autoLogin')
+    },
   components: {
     Footer
   }

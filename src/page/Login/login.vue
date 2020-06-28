@@ -33,7 +33,7 @@
                 <div class="login_circular" :class="{login_isShow_circular:isShowPwd}"></div>
               </div>
               <input type="text" placeholder="验证码" v-model="captcha"/>
-              <img src="./images/captcha.svg" alt />
+              <img ref="refsImg" src="http://localhost:4000/captcha" @click="toggleCaptcha"/>
             </section>
           </form>
         </div>
@@ -55,7 +55,8 @@
 </template>
 
 <script>
-import {MessageBox} from 'mint-ui'
+import {MessageBox,Toast} from 'mint-ui'
+import {reqSendcode,reqLoginPwd,reqLoginSms} from '../../api'
 export default {
   data() {
     return {
@@ -76,32 +77,42 @@ export default {
       this.ishow = !this.ishow;
     },
     //点击发送验证码
-    sendSms() {
+   async sendSms() {
       //在当前没有计时的情况下 解决计时器加快
       if(!this.time){
       //设置最大倒计时
       this.time = 30;
-      clearInterval(intervalId);
-      const intervalId = setInterval(() => {
+     this.intervalId = setInterval(() => {
         this.time--
         if (this.time <= 0) {
-          clearInterval(intervalId);
+          clearInterval(this.intervalId);
         }
       }, 1000);
       //发送ajax请求
-
+      const result =  await reqSendcode(this.phone)
+      if(result.code === 0){
+        Toast('发送短信成功')  
+      }else{
+        //停止倒计时
+        this.time = 0
+        clearInterval(this.intervalId);
+        MessageBox.alert('发送短信失败')
+      }
+        
       }
     },
     //前台验证
-    loginIn(){
-        const {ishow,code,name,pwd,captcha} = this
+   async loginIn(){
+        const {ishow,code,phone,name,pwd,captcha} = this
+        let result
       if(!ishow){//手机号
         if(!this.rightPhone){
           return MessageBox.alert('必须输入正确的手机号')
-        }else if(!/^d{6}$/.test(code)){
+        }else if(!/^\d{6}$/.test(code)){
           return MessageBox.alert('必须输入正确的验证码') 
         }
         //发送ajax请求
+        result = await reqLoginSms(phone,code)
       }else{//短信
         if(!name.trim()){
            return MessageBox.alert('必须输入用户名')
@@ -111,7 +122,30 @@ export default {
            return MessageBox.alert('必须输入验证码') 
         }
         //发送ajax请求
+       result = await reqLoginPwd({name,pwd,captcha})
+        //如果短信登录失败
+        if(result.code === 1){
+          MessageBox.alert('短信登录失败')
+          //重新刷新验证码
+          this.toggleCaptcha()
+        //   this.captcha
+        }
       }
+
+      // 统一处理
+      if(result.code === 0){
+        const userInfo = result.data
+        //保存到state中
+        this.$store.dispatch('getUserInfo',userInfo)
+        //跳转到person
+        this.$router.replace('/person')
+      }else{
+         MessageBox.alert('登录失败')
+      }
+    },
+    //点击刷新captcha
+    toggleCaptcha(){
+      this.$refs.refsImg.src = 'http://localhost:4000/captcha?time='+Date.now() 
     }
   },
   computed: {
